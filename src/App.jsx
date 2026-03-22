@@ -59,15 +59,15 @@ Also find 3 recent news headlines relevant to these specific tickers.
 You MUST respond with ONLY a raw JSON object. No markdown. No code fences. No explanation. Start your response with { and end with }. Use exactly this structure:
 {"prices":{"AAPL":{"price":213.5,"change_pct":-0.42,"high_52w":260.10,"low_52w":164.08,"market_cap":"3.2T","pe_ratio":33.2,"volume":"52.3M","beta":1.24},"BTC":{"price":67420,"change_pct":1.23,"high_52w":109000,"low_52w":49000,"market_cap":"1.3T","volume":"28.4B"}},"indices":{"S&P 500":{"value":5280.5,"change_pct":0.31},"NASDAQ":{"value":18420.3,"change_pct":0.55},"DOW":{"value":39820.1,"change_pct":0.18},"Bitcoin":{"value":67420,"change_pct":1.23}},"news":[{"title":"Apple reports strong earnings","source":"Reuters","ticker":"AAPL","time":"2h ago"},{"title":"Fed holds rates steady","source":"Bloomberg","ticker":"ALL","time":"4h ago"},{"title":"Bitcoin rises on ETF inflows","source":"CoinDesk","ticker":"BTC","time":"1h ago"}]}`;
 
-  // Use VITE_ANTHROPIC_API_KEY from .env for local/deployed use
-  // Inside Claude.ai artifacts no key is needed (handled by the platform)
+  // API key: reads from VITE_ANTHROPIC_API_KEY env var (set in Vercel dashboard)
+  // anthropic-dangerous-direct-browser-iframes is required for direct browser→API calls
   const apiKey = typeof import.meta !== "undefined" ? import.meta.env?.VITE_ANTHROPIC_API_KEY : undefined;
-  const reqHeaders = { "Content-Type": "application/json" };
-  if (apiKey) {
-    reqHeaders["x-api-key"] = apiKey;
-    reqHeaders["anthropic-version"] = "2023-06-01";
-    reqHeaders["anthropic-dangerous-direct-browser-iframes"] = "true";
-  }
+  const reqHeaders = {
+    "Content-Type": "application/json",
+    "anthropic-version": "2023-06-01",
+    "anthropic-dangerous-direct-browser-iframes": "true",
+    ...(apiKey ? { "x-api-key": apiKey } : {}),
+  };
   const res = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: reqHeaders,
@@ -275,7 +275,7 @@ export default function App(){
     <div style={{fontFamily:"'DM Mono','Fira Code',monospace",background:C.bg,minHeight:"100vh",color:C.text}}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@700;800&display=swap');
-        *{box-sizing:border-box;margin:0;padding:0}
+        *{box-sizing:border-box;margin:0;padding:0}html,body{overflow-x:hidden;width:100%}
         ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:#1e2d45;border-radius:2px}
         input,select{outline:none;background:#0d1526;border:1px solid #1e2d45;color:#e8f0fe;padding:10px 14px;border-radius:8px;font-family:inherit;font-size:14px;width:100%}
         input:focus,select:focus{border-color:#00d4ff}
@@ -285,15 +285,15 @@ export default function App(){
         .btn-sm{padding:5px 10px;font-size:12px}
         .row{display:flex;gap:12px;align-items:center}
         .rb{display:flex;justify-content:space-between;align-items:center}
-        .card{background:#141d2e;border:1px solid #1e2d45;border-radius:16px;padding:20px}
+        .card{background:#141d2e;border:1px solid #1e2d45;border-radius:14px;padding:16px}
         .tag{display:inline-flex;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500}
         .tag-stock{background:#1a2a4a;color:#00d4ff;border:1px solid #003d5c}
         .tag-crypto{background:#1a2a1a;color:#00e676;border:1px solid #004422}
         .overlay{position:fixed;inset:0;background:rgba(0,0,0,.78);display:flex;align-items:center;justify-content:center;z-index:100;padding:20px}
         .modal{background:#111827;border:1px solid #1e2d45;border-radius:20px;padding:32px;width:100%;max-width:440px;max-height:90vh;overflow-y:auto}
         table{width:100%;border-collapse:collapse}
-        th{text-align:left;font-size:11px;color:#6b7fa3;text-transform:uppercase;letter-spacing:1px;padding:9px 12px;border-bottom:1px solid #1e2d45;white-space:nowrap}
-        td{padding:11px 12px;border-bottom:1px solid #0d1526;font-size:13px}
+        th{text-align:left;font-size:10px;color:#6b7fa3;text-transform:uppercase;letter-spacing:1px;padding:8px 10px;border-bottom:1px solid #1e2d45;white-space:nowrap}
+        td{padding:9px 10px;border-bottom:1px solid #0d1526;font-size:12px}
         tr:last-child td{border-bottom:none}
         tr:hover td{background:#141d2e88}
         .nav-tab{cursor:pointer;padding:7px 16px;border-radius:8px;font-size:13px;color:#6b7fa3;transition:all .2s;border:1px solid transparent}
@@ -328,8 +328,8 @@ export default function App(){
       `}</style>
 
       {/* ── Top Nav ── */}
-      <div style={{borderBottom:`1px solid ${C.border}`,padding:"0 24px",position:"sticky",top:0,zIndex:50,background:"#0a0f1ef2",backdropFilter:"blur(16px)"}}>
-        <div style={{maxWidth:1340,margin:"0 auto",display:"flex",justifyContent:"space-between",alignItems:"center",height:58}}>
+      <div style={{borderBottom:`1px solid ${C.border}`,padding:"0 20px",position:"sticky",top:0,zIndex:50,background:"#0a0f1ef2",backdropFilter:"blur(16px)"}}>
+        <div style={{maxWidth:"100%",margin:"0 auto",display:"flex",justifyContent:"space-between",alignItems:"center",height:58,padding:"0 4px"}}>
           <div style={{fontFamily:"'Syne',sans-serif",fontWeight:800,fontSize:19,letterSpacing:"-0.5px",display:"flex",alignItems:"center",gap:8}}>
             <span style={{color:C.accent}}>◈</span> FOLIO
           </div>
@@ -350,12 +350,12 @@ export default function App(){
             <button className="btn btn-primary" style={{padding:"7px 16px"}} onClick={()=>setModal("add-holding")}>+ Add</button>
           </div>
         </div>
-        {isFetching&&<div style={{maxWidth:1340,margin:"0 auto",paddingBottom:6}}><div className="progress-bar"><div className="progress-fill pulse" style={{width:"55%"}}/></div></div>}
+        {isFetching&&<div style={{maxWidth:"100%",margin:"0 auto",paddingBottom:6}}><div className="progress-bar"><div className="progress-fill pulse" style={{width:"55%"}}/></div></div>}
       </div>
 
       {fetchState.status==="error"&&<div style={{background:"#ff475718",borderBottom:"1px solid #ff475733",padding:"8px 24px",fontSize:12,color:C.red}}>⚠ {fetchState.error}</div>}
 
-      <div style={{maxWidth:1340,margin:"0 auto",padding:"24px"}}>
+      <div style={{maxWidth:"100%",margin:"0 auto",padding:"20px 24px",overflowX:"hidden"}}>
 
         {/* ══════════ PORTFOLIO TAB ══════════ */}
         {tab==="portfolio"&&(
@@ -363,7 +363,7 @@ export default function App(){
 
             {/* Market indices bar */}
             {Object.keys(mktData.indices).length>0&&(
-              <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12,marginBottom:20}}>
+              <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10,marginBottom:16}}>
                 {Object.entries(mktData.indices).map(([name,d],i)=>(
                   <IndexCard key={i} name={name} val={d.value} chg={d.change_pct??0}/>
                 ))}
@@ -371,7 +371,7 @@ export default function App(){
             )}
 
             {/* Main two-column layout */}
-            <div style={{display:"grid",gridTemplateColumns:"1fr 340px",gap:20,marginBottom:20}}>
+            <div style={{display:"grid",gridTemplateColumns:"1fr minmax(0,300px)",gap:16,marginBottom:20}}>
 
               {/* Left: portfolio value + holdings table */}
               <div style={{display:"flex",flexDirection:"column",gap:20}}>
@@ -381,7 +381,7 @@ export default function App(){
                   <div style={{marginBottom:16}}>
                     <div style={{fontSize:11,color:C.muted,textTransform:"uppercase",letterSpacing:"1px",marginBottom:4}}>Portfolio Value</div>
                     <div style={{display:"flex",alignItems:"baseline",gap:14,flexWrap:"wrap"}}>
-                      <div style={{fontFamily:"'Syne',sans-serif",fontWeight:800,fontSize:36,color:C.text,lineHeight:1}}>{fmtUSD(totalVal)}</div>
+                      <div style={{fontFamily:"'Syne',sans-serif",fontWeight:800,fontSize:30,color:C.text,lineHeight:1}}>{fmtUSD(totalVal)}</div>
                       <div style={{display:"flex",alignItems:"center",gap:6}}>
                         <span style={{fontSize:16,fontWeight:600,color:gainIsPos?C.green:C.red}}>{gainIsPos?"+":""}{fmtUSD(totalGain)}</span>
                         <span className="plb" style={{background:gainIsPos?"#00e67618":"#ff475718",color:gainIsPos?C.green:C.red,fontSize:13}}>{gainIsPos?"▲":"▼"}{fmt(Math.abs(totalGainPct))}%</span>
@@ -459,7 +459,7 @@ export default function App(){
                 </div>
 
                 {/* Bottom charts row */}
-                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}}>
                   {/* Gain bar */}
                   <div className="card">
                     <div style={{fontFamily:"'Syne',sans-serif",fontWeight:700,fontSize:14,marginBottom:14}}>Unrealized Gain / Loss</div>
