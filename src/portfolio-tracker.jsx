@@ -59,18 +59,11 @@ Also find 3 recent news headlines relevant to these specific tickers.
 You MUST respond with ONLY a raw JSON object. No markdown. No code fences. No explanation. Start your response with { and end with }. Use exactly this structure:
 {"prices":{"AAPL":{"price":213.5,"change_pct":-0.42,"high_52w":260.10,"low_52w":164.08,"market_cap":"3.2T","pe_ratio":33.2,"volume":"52.3M","beta":1.24},"BTC":{"price":67420,"change_pct":1.23,"high_52w":109000,"low_52w":49000,"market_cap":"1.3T","volume":"28.4B"}},"indices":{"S&P 500":{"value":5280.5,"change_pct":0.31},"NASDAQ":{"value":18420.3,"change_pct":0.55},"DOW":{"value":39820.1,"change_pct":0.18},"Bitcoin":{"value":67420,"change_pct":1.23}},"news":[{"title":"Apple reports strong earnings","source":"Reuters","ticker":"AAPL","time":"2h ago"},{"title":"Fed holds rates steady","source":"Bloomberg","ticker":"ALL","time":"4h ago"},{"title":"Bitcoin rises on ETF inflows","source":"CoinDesk","ticker":"BTC","time":"1h ago"}]}`;
 
-  // API key: reads from VITE_ANTHROPIC_API_KEY env var (set in Vercel dashboard)
-  // anthropic-dangerous-direct-browser-iframes is required for direct browser→API calls
-  const apiKey = typeof import.meta !== "undefined" ? import.meta.env?.VITE_ANTHROPIC_API_KEY : undefined;
-  const reqHeaders = {
-    "Content-Type": "application/json",
-    "anthropic-version": "2023-06-01",
-    "anthropic-dangerous-direct-browser-iframes": "true",
-    ...(apiKey ? { "x-api-key": apiKey } : {}),
-  };
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
+  // Calls our own Vercel serverless function at /api/market
+  // which injects the ANTHROPIC_API_KEY server-side (never exposed to browser)
+  const res = await fetch("/api/market", {
     method: "POST",
-    headers: reqHeaders,
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       model: "claude-sonnet-4-6",
       max_tokens: 2000,
